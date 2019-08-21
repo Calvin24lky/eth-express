@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>E</title>
+</head>
+<body>
+	<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+	<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+	<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+	<script>
+
+	var filedata =""
+
+	//判断浏览器是否支持FileReader接口  
+	if(typeof FileReader == 'undefined'){  
+	result.InnerHTML="<p>你的浏览器不支持FileReader接口！</p>";  
+	//使选择控件不可操作  
+	file.setAttribute("disabled","disabled");  
+	} 
+
+	function getData(){}
+	function dealSelectFiles(){
+		//get selected file
+		var filepath = document.getElementById("file").value;
+
+		filepath = filepath.split("\\");
+		//get filename
+		var filename = filepath[filepath.length - 1];
+
+		//将名称显示在框中
+		document.getElementById("fileName").value=filename;
+
+		var file = document.getElementById("file").files[0];
+		var img = document.getElementById("img");
+		
+		var reader = new FileReader();
+		
+		//将文件以文本形式读入页面  
+		reader.readAsDataURL(file);  
+		reader.onload=function(){
+			filedata = this.result;
+			//console.log(ToHashCode);
+			//window.alert(filedata);
+			img.src = filedata;
+		}
+	}
+	function toHash(){
+		//将字符串进行md5加密
+		var hash= md5(filedata);
+		document.getElementById("hashcode").value=hash;
+	}
+	function copyText(text) {
+        var textarea = document.createElement("input");//创建input对象
+        var currentFocus = document.activeElement;//当前获得焦点的元素
+        document.body.appendChild(textarea);//添加元素
+        textarea.value = text;
+        textarea.focus();
+        if(textarea.setSelectionRange)
+            textarea.setSelectionRange(0, textarea.value.length);//获取光标起始位置到结束位置
+        else
+            textarea.select();
+        try {
+            var flag = document.execCommand("copy");//执行复制
+        } catch(eo) {
+            var flag = false;
+        }
+        document.body.removeChild(textarea);//删除元素
+        currentFocus.focus();
+        return flag;
+	}
+
+	</script>
+	<br>	
+	<div>
+			<script>
+					$(document).ready(function(){
+						$("#getaccounts").click(function(){
+							$.get("/accounts",function(data,status){
+								$('#accounts').empty();
+								//alert("数据: " + data + "\n状态: " + status);
+								var info = JSON.parse(data); //字符串转为js对象
+								//alert("数据: " + info.accounts[0].address);
+								for (var i = 0; i < info.length - 1; i++)
+								$('#accounts').append('<option> ' + info.accounts[i].address + ' (' + info.accounts[i].balance + 'eth)' + '</option>');
+							});
+						});
+					});
+			</script>
+			<button type="button" id="getaccounts" style="color:white;background-color:rgb(248, 185, 69)">accounts</button>
+		<select id="accounts" style="width:450px; height:20px;">
+			<option value=""></option>
+		</select>
+			<script>
+				function copyAccount()
+				{
+					//var target=document.getElementById("accounts");
+					var account=$("#accounts").val().split(" ")[0]; // 获取复选框当前的值，去掉尾部的(100eth)
+					var flag = copyText(account); //传递文本
+        			//alert(flag ? "复制成功！" : "复制失败！");
+				}
+			</script>
+		<button type="button" id="copy" onClick="copyAccount()" style="color:white;background-color:rgb(248, 185, 69)">copy</button>
+	</div>
+	<br>
+	<div>
+		<div>
+			<script>
+				$(document).ready(function(){
+					$("#addController").click(function(){
+						$.post("/addController",{
+							address:$("#ctrladdress").val()
+						},
+						function(data,status){
+							//$("#readResult").val(data);
+						});
+					});
+				});
+			</script>
+			<button type="button" id="addController" style="color:white;background-color:rgb(248, 185, 69)">addController</button>
+			<input type="text" id="ctrladdress" name="addContr" value="" style="width:330px; height:15px;" placeholder="address controller">
+		</div>
+
+		<div>
+			<script>
+					$(document).ready(function(){
+						$("#removeController").click(function(){
+							$.post("/removeController",{
+								address:$("#removeaddress").val()
+							},
+							function(data,status){
+								//$("#readResult").val(data);
+							});
+						});
+					});
+				</script>
+			<button type="button" id="removeController" style="color:white;background-color:rgb(248, 185, 69)">removeController</button>
+			<input type="text" id="removeaddress" name="removeContr" value="" style="width:330px; height:15px;" placeholder="address controller">
+		</div>
+		<div>
+			<script>
+					$(document).ready(function(){
+						$("#writeIndex").click(function(){
+							$.post("/writeIndex",{
+								key:$("#writeParams").val().split(",")[0],
+								hash:$("#writeParams").val().split(",")[1]
+							},
+							function(data,status){
+								//$("#readResult").val(data);
+							});
+						});
+					});
+				</script>
+			<button type="button" id="writeIndex" style="color:white;background-color:rgb(248, 185, 69)">writeIndex</button>
+			<input type="text" id="writeParams" name="writeParams" value="" style="width:330px; height:15px;" placeholder="string key, uint256 hash">
+		</div>
+		<div>
+			<script>
+					$(document).ready(function(){
+						$("#getmanager").click(function(){
+							$.get("/manager",function(data,status){
+								$("#manager").val(data);
+							});
+						});
+					});
+			</script>
+			<button type="button" id="getmanager" style="color:white;background-color:rgb(0, 162, 255)">manager</button>
+			<input type="text" id="manager" name="manager" value="" style="width:330px; height:15px;">
+		</div>
+		<div>
+			<script>
+				$(document).ready(function(){
+					$("#readindex").click(function(){
+						$.post("/readIndex",{
+							controller:$("#readParams").val().split(",")[0],
+							key:$("#readParams").val().split(",")[1]
+						},
+						function(data,status){
+							$("#readResult").val(data);
+						});
+					});
+				});
+			</script>
+			<button type="button" id="readindex" style="color:white;background-color:rgb(0, 162, 255)">readIndex</button>
+			<input type="text" id="readParams" name="readParams" value="" style="width:350px; height:15px;" placeholder="address controller, string key" >
+			<input type="text" id="readResult" name="readIndex" value="" >
+		</div>
+	</div>
+		
+	<!-- 打开本地文件夹 -->
+	<div>
+		<button type="button" id="chooseFile" style="color:white;background-color:rgb(166, 236, 144);">选择文件</button>
+		<input type="file" name="file" id="file" style="display:none" onchange="dealSelectFiles()"/>
+		<input type="text" name="fileName" id="fileName" value="">
+		<img src="" id="img" style="width:70px;height:70px;">
+
+		<script>
+				// 检测是否支持File API
+				if (window.File && window.FileReader && window.FileList && window.Blob) {
+					//点击button然后触发点击file
+					document.getElementById('chooseFile').addEventListener('click',function() {
+						document.getElementById('file').click();
+					}, false);
+				} else {
+					alert('The File APIs are not fully supported in this browser.');
+				}
+			</script>
+	</div>
+		
+	<div>
+		<input type="button" id="convertHash" onclick="toHash()" style="color:white;background-color:rgb(166, 236, 144);" value="生成hash" >
+	</div>
+		
+	<div>
+		<textarea type="text" id="hashcode" style="width:300px;height:200px;" value="hash code"></textarea>
+	</div>
+	
+	<div>
+		<button type="button" onclick="" style="color:white;background-color:rgb(166, 236, 144)">校验hash</button>
+		<input type="text" id="judge">
+	</div>
+	  
+</body>
+</html>
